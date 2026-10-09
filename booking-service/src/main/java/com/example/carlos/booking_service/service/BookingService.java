@@ -8,6 +8,7 @@ import com.example.carlos.booking_service.request.BookingRequest;
 import com.example.carlos.booking_service.response.BookingResponse;
 import com.example.carlos.booking_service.response.InventoryResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -18,11 +19,15 @@ public class BookingService {
 
     private final CustomerRepository customerRepository;
     private final InventoryServiceClient inventoryServiceClient;
+    private final KafkaTemplate<String, BookingEvent> kafkaTemplate;
+
 
     public BookingService(final CustomerRepository customerRepository,
-                          final InventoryServiceClient inventoryServiceClient) {
+                          final InventoryServiceClient inventoryServiceClient,
+                          final KafkaTemplate<String, BookingEvent> kafkaTemplate) {
         this.customerRepository = customerRepository;
         this.inventoryServiceClient = inventoryServiceClient;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     public BookingResponse createBooking(final BookingRequest request) {
@@ -39,6 +44,7 @@ public class BookingService {
         }
         // create booking event (for response)
         final BookingEvent bookingEvent = createBookingEvent(request, customer, inventoryResponse);
+        kafkaTemplate.send("booking", bookingEvent);
         log.info("Booking created: {}", bookingEvent);
         return BookingResponse.builder()
                 .userId(bookingEvent.getUserId())
