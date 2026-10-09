@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.math.BigDecimal;
 
 @Entity
 @Getter
@@ -29,6 +30,9 @@ public class Event {
 
     @Column(name = "left_capacity")
     private Long leftCapacity;
+
+    @Column(name = "ticket_price")
+    private BigDecimal ticketPrice;
 
     @ManyToOne
     @JoinColumn(name = "venue_id", referencedColumnName = "id")

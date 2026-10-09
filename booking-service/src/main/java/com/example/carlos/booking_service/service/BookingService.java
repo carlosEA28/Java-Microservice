@@ -10,6 +10,8 @@ import com.example.carlos.booking_service.response.InventoryResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 
@@ -31,16 +33,20 @@ public class BookingService {
     }
 
     public BookingResponse createBooking(final BookingRequest request) {
+        if (request.getUserId() == null || request.getEventId() == null
+                || request.getTicketCount() == null || request.getTicketCount() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User, event and a positive ticket count are required");
+        }
         // check if user exists
         final Customer customer = customerRepository.findById(request.getUserId()).orElse(null);
         if (customer == null) {
-            throw new RuntimeException("User not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
         // check if there is enough inventory
         final InventoryResponse inventoryResponse = inventoryServiceClient.getInventory(request.getEventId());
         log.info("Inventory Response: {}", inventoryResponse);
         if (inventoryResponse.getCapacity() < request.getTicketCount()) {
-            throw new RuntimeException("Not enough inventory");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Not enough inventory");
         }
         // create booking event (for response)
         final BookingEvent bookingEvent = createBookingEvent(request, customer, inventoryResponse);

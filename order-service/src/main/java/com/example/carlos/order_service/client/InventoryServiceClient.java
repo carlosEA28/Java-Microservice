@@ -9,8 +9,8 @@ public class InventoryServiceClient {
 
     private final RestClient restClient;
 
-    public InventoryServiceClient(RestClient.Builder builder, @Value("${inventory.service.url}") String inventoryServiceUrl) {
-        this.restClient = builder.baseUrl(inventoryServiceUrl).build();
+    public InventoryServiceClient(@Value("${inventory.service.url}") String inventoryServiceUrl) {
+        this.restClient = RestClient.builder().baseUrl(inventoryServiceUrl).build();
     }
 
     public void updateInventory(Long eventId, Long ticketCount) {

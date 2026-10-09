@@ -15,13 +15,23 @@ public class InventoryController {
     @Autowired
     private InventoryService inventoryService;
 
-    @GetMapping("/iventory/events")
+    @GetMapping("/inventory/events")
     public @ResponseBody List<EventInventoryResponse> inventoryGetAllEvents () {
         return inventoryService.getAllEvents();
     }
 
-    @GetMapping("/iventory/venues/{venueId}")
+    @GetMapping("/inventory/venue/{venueId}")
     public @ResponseBody VenueInventoryResponse inventoryGetAllEventsByVenueId (@PathVariable Long venueId) {
         return inventoryService.getVenueEvents(venueId);
+    }
+
+    @GetMapping("/inventory/event/{eventId}")
+    public EventInventoryResponse getEvent(@PathVariable Long eventId) {
+        return inventoryService.getEvent(eventId);
+    }
+
+    @PutMapping("/inventory/event/{eventId}/capacity/{ticketCount}")
+    public void decreaseCapacity(@PathVariable Long eventId, @PathVariable Long ticketCount) {
+        inventoryService.decreaseCapacity(eventId, ticketCount);
     }
 }
