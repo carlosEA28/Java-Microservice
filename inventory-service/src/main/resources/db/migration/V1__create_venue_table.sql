@@ -1,0 +1,6 @@
+CREATE TABLE venue (
+    id BIGINT NOT NULL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    total_capacity BIGINT NOT NULL
+);
