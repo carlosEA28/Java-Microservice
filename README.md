@@ -2,6 +2,15 @@
 
 Plataforma de reservas de ingressos construída com Java, Spring Boot, PostgreSQL e Apache Kafka. O API Gateway expõe as rotas HTTP; a criação de uma reserva publica um evento no Kafka, consumido pelo serviço de pedidos para registrar o pedido e reduzir a capacidade disponível.
 
+## Destaques (para currículo)
+
+- Desenvolvi **4 serviços** — API Gateway, Inventory, Booking e Order — com APIs REST em Spring Boot e roteamento via Spring Cloud Gateway MVC.
+- Implementei comunicação assíncrona com **Apache Kafka**: o Booking publica eventos de reserva e o Order os consome para persistir pedidos e acionar a atualização do estoque.
+- Modelei a persistência com **Spring Data JPA e PostgreSQL**, aplicando **6 migrações Flyway** para controlar a evolução do esquema.
+- Implementei baixa **atômica e condicional** da capacidade do evento, impedindo que a atualização produza estoque negativo; expus os contratos HTTP com OpenAPI.
+- Configurei **3 contêineres Docker** para PostgreSQL, Kafka e Zookeeper para ambiente de desenvolvimento e CI reproduzível.
+- Validei os **3 serviços de domínio** com **24 testes unitários** (Mockito/JUnit 5) cobrindo validações, fluxos de erro (404/409), casos de borda e verificação de ordem de operações.
+
 ## Arquitetura
 
 ```mermaid
@@ -118,5 +127,11 @@ for service in inventory-service booking-service order-service api-gateway; do
   (cd "$service" && ./mvnw test) || break
 done
 ```
+
+**Cobertura de testes unitários adicionada:**
+
+- **Booking Service** (`BookingServiceTest`): 8 testes cobrindo criação de reserva válida, usuário não encontrado, validações de entrada (userId, eventId, ticketCount nulos/zero/negativos), estoque insuficiente e verificação do evento publicado no Kafka.
+- **Inventory Service** (`InventoryServiceTest`): 10 testes cobrendo listagem de eventos (com e sem dados), busca por ID, erros 404, atualização atômica de capacidade, validações de ticketCount (null/zero/negativo), conflitos de capacidade, evento não encontrado e consulta de eventos por local.
+- **Order Service** (`OrderServiceTest`): 6 testes cobrindo persistência do pedido antes da atualização de inventário, campos corretos do pedido, chamada ao cliente de inventário com parâmetros corretos, ordem das operações (save antes do update), ticketCount zero e valores grandes.
 
 Para encerrar a infraestrutura, execute `docker compose down` dentro de `inventory-service`. Esse comando preserva o volume do PostgreSQL.
